@@ -1,5 +1,5 @@
 require "jester/version"
+require "jester/cli"
 
 module Jester
-  # Your code goes here...
 end
