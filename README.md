@@ -1,5 +1,7 @@
 # Jester
 
+[![Build Status](https://travis-ci.org/adampats/jester.svg?branch=master)](https://travis-ci.org/adampats/jester)
+
 A command line tool to enable more seamless "local" development of Jenkinsfile groovy pipelines without having to do the typical "commit, push, webhook, pipeline job run" to iterate on a pipeline.
 
 ## Installation
