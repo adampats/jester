@@ -24,6 +24,12 @@ Or install it yourself as:
 
 TODO: Write usage instructions here
 
+```
+docker run -d -p 8080:8080 --name localjenkins jenkins/jenkins:lts
+docker logs localjenkins
+open http://localhost:8080
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
