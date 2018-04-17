@@ -27,9 +27,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-#  spec.add_dependency 'jenkins_api_client', "~> 1.5.3"
   spec.add_dependency 'thor', "~> 0.20.0"
-  spec.add_dependency 'rest-client', "~> 2.0.2"
   spec.add_dependency 'faraday', "~> 0.14.0"
 
   spec.add_development_dependency "bundler", "~> 1.11"
