@@ -14,20 +14,14 @@ module Jester
       aliases: '-u', default: "admin"
     class_option :password, desc: "Password to connect with",
       aliases: '-p', default: "admin"
-    class_option :debug, desc: "Toggle verbose/debug output",
+    class_option :verbose, desc: "Toggle verbose/debug output",
       aliases: '-v', default: false, type: :boolean
 
     #
     desc "test", "Test Jenkins server connectivity"
-    method_option :url, desc: "URL of Jenkins master",
-      aliases: '-s', default: "http://localhost:8080"
-    method_option :username, desc: "User to connect with",
-      aliases: '-u', default: "admin"
-    method_option :password, desc: "Password to connect with",
-      aliases: '-p', default: "admin"
     def test
       puts "Testing authenticated connectivity to #{@options[:url]}..."
-      r = get( @options[:url], @options[:username], @options[:password] )
+      r = get( @options[:url] )
       version = r['x-jenkins']
       if version.nil?
         puts "Fail"
@@ -50,8 +44,7 @@ module Jester
           description: @options[:job_name],
           script: '// empty job created by jester\n node {print "test"}' }
         xml = pipeline_xml(job_params)
-        r = post( @options[:url] + "/createItem?name=#{@options[:job_name]}",
-          @options[:username], @options[:password], xml )
+        r = post( @options[:url] + "/createItem?name=#{@options[:job_name]}", xml )
         if r.status == 200
           puts "Job successfully created."
         else
@@ -73,14 +66,14 @@ module Jester
 
     #
     def debug
-      @options[:debug]
+      @options[:verbose]
     end
 
     #
-    def get (url, user, pass, params = {})
+    def get (url, params = {})
       begin
         c = Faraday.new(url: url) do |conn|
-          conn.basic_auth(user, pass)
+          conn.basic_auth(@options[:username], @options[:password])
           conn.adapter Faraday.default_adapter
         end
         resp = c.get
@@ -91,12 +84,12 @@ module Jester
     end
 
     #
-    def post (url, user, pass, body, params = {})
+    def post (url, body, params = {})
       begin
-        crumb = get_crumb(url, user, pass)
-        puts "DEBUG: crumb = " + crumb if @options[:debug]
+        crumb = get_crumb(url, @options[:username], @options[:password])
+        puts "DEBUG: crumb = " + crumb if @options[:verbose]
         c = Faraday.new(url: url) do |conn|
-          conn.basic_auth(user, pass)
+          conn.basic_auth(@options[:username], @options[:password])
           conn.adapter Faraday.default_adapter
         end
         resp = c.post do |conn|
@@ -104,7 +97,7 @@ module Jester
           conn.headers['Content-Type'] = 'application/xml'
           conn.body = body
         end
-        if @options[:debug]
+        if @options[:verbose]
           puts "DEBUG: "
           pp resp.to_hash[:response_headers]
         end
@@ -120,8 +113,7 @@ module Jester
       p_url = URI.parse(url)
       base_url = p_url.scheme + "://" + p_url.host + ":" + p_url.port.to_s
       r = get(base_url +
-        '/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)',
-        user, pass )
+        '/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)' )
       r.body.split(':')[1]
     end
 
@@ -144,8 +136,7 @@ module Jester
 
     #
     def job_exists? (job_name)
-      job = get( @options[:url] + "/job/" + job_name,
-        @options[:username], @options[:password] )
+      job = get( @options[:url] + "/job/" + job_name )
       if job.reason_phrase == "Found"
         true
       else
