@@ -7,6 +7,9 @@ require 'uri'
 module Jester
   class Cli < Thor
 
+    # Constants
+    JOB_RETRY = 2 # seconds to wait between checking build result
+
     # Global options
     class_option :url, desc: "URL of Jenkins master",
       aliases: '-s', default: "http://localhost:8080"
@@ -57,8 +60,53 @@ module Jester
     desc "build", "Build (run) a Jenkins pipeline job"
     method_option :job_name, desc: "Pipeline job name",
       aliases: '-j', default: 'jester-test-job'
+    method_option :pipeline_file, desc: "Path to ad-hoc pipeline (Jenkinsfile) file",
+      aliases: '-f', default: 'Jenkinsfile'
     def build
+      if File.file?(@options[:pipeline_file])
+        pipeline = File.read(@options[:pipeline_file])
+      else
+        puts "File not found: " + @options[:pipeline_file]
+        raise 'FileNotFound'
+      end
+      job_params = {
+        description: @options[:job_name],
+        script: pipeline }
+      xml = pipeline_xml(job_params)
 
+      if job_exists?(@options[:job_name])
+        path = "/job/" + @options[:job_name] + "/config.xml"
+      else
+        path = "/createItem?name=" + @options[:job_name]
+      end
+      r = post( @options[:url] + path, xml )
+      if r.status != 200
+        puts "Job config update failed."
+        quit
+      else
+        puts "Job config update succeeded."
+      end
+
+      build_path = "/job/" + @options[:job_name] + "/build?delay=0sec"
+      build_resp = post( @options[:url] + build_path )
+      if build_resp.status != 201
+        puts "Unable to run build. Quit"
+        quit
+      else
+        puts "Build running - getting output..."
+      end
+      resp = get(@options[:url] + "/job/" + @options[:job_name] + "/api/json")
+      json = JSON.parse(resp.body)
+      if json['inQueue'] == false
+        build_num = json['lastBuild']['number']
+      end
+
+      build = build_result(@options[:job_name], build_num)
+      puts "Job " + build_num.to_s + " result: " + build['result']
+      log = log_result(@options[:job_name], build_num)
+      puts "DEBUG: " + log.body if debug
+      File.write("#{@options[:job_name]}.log", log.body)
+      puts "See #{@options[:job_name]}.log for output."
     end
 
 
@@ -84,7 +132,7 @@ module Jester
     end
 
     #
-    def post (url, body, params = {})
+    def post (url, body = nil, params = {})
       begin
         crumb = get_crumb(url, @options[:username], @options[:password])
         puts "DEBUG: crumb = " + crumb if @options[:verbose]
@@ -95,7 +143,9 @@ module Jester
         resp = c.post do |conn|
           conn.headers['Jenkins-Crumb'] = crumb
           conn.headers['Content-Type'] = 'application/xml'
-          conn.body = body
+          if body != nil
+            conn.body = body
+          end
         end
         if @options[:verbose]
           puts "DEBUG: "
@@ -142,6 +192,27 @@ module Jester
       else
         false
       end
+    end
+
+    #
+    def build_result (job_name, build_number)
+      result = nil
+      while result.nil?
+        resp = JSON.parse(
+          get( @options[:url] +
+            "/job/" + job_name + "/" + build_number.to_s + "/api/json").body )
+        if resp['building'] == true || resp['result'].nil?
+          sleep JOB_RETRY
+          print "." if debug
+        end
+        result = resp['result']
+      end
+      resp
+    end
+
+    #
+    def log_result (job_name, build_number)
+      resp = get( @options[:url] + "/job/" + job_name + "/" + build_number.to_s + "/consoleText")
     end
 
   end

@@ -1,0 +1,8 @@
+#!/usr/bin/env groovy
+
+// this is just a sample Jenkins pipeline script for testing, not for building this project!
+
+node {
+  print "hello world!"
+  sh('env | sort')
+}
