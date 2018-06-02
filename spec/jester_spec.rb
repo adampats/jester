@@ -18,5 +18,9 @@ describe Jester do
     expect { Jester::Cli.start(ARGV) }.to output(/new/).to_stdout
   end
 
+  it 'has a "build" command' do
+    expect { Jester::Cli.start(ARGV) }.to output(/build/).to_stdout
+  end
+
 
 end

@@ -4,6 +4,20 @@
 
 A command line tool to enable more seamless "local" development of Jenkinsfile groovy pipelines without having to do the typical "commit, push, webhook, pipeline job run" to iterate on a pipeline.
 
+Instead, you can use jester, which performs the following:
+
+ * foo
+
+Todo:
+ * X rip out jenkins_api_client
+ * X add generic REST methods
+ * X update existing methods until tests pass
+ * X implement new() method
+ * implement job runner method
+ * get log output method(s)
+ * implement update() method
+
+
 ## Installation
 
 Add this line to your application's Gemfile:
