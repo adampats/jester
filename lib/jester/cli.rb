@@ -1,5 +1,4 @@
 require 'thor'
-require 'pry'
 require 'faraday'
 require 'json'
 require 'uri'
