@@ -6,17 +6,14 @@ A command line tool to enable more seamless "local" development of Jenkinsfile g
 
 Instead, you can use jester, which performs the following:
 
- * foo
+ * Creates (or uses existing) pipeline job on Jenkins master
+ * Updates the pipeline job's value of the pipeline script with a custom string or local Jenkinsfile
+ * Runs the pipeline job with the newly modified script
+ * Fetches the job console output and saves it to a local file for review
 
-Todo:
- * X rip out jenkins_api_client
- * X add generic REST methods
- * X update existing methods until tests pass
- * X implement new() method
- * implement job runner method
- * get log output method(s)
- * implement update() method
+All of this is done from the command line - logging in to the Jenkins UI *not* required.
 
+-----
 
 ## Installation
 
@@ -34,15 +31,22 @@ Or install it yourself as:
 
     $ gem install jester
 
+-----
+
 ## Usage
 
-TODO: Write usage instructions here
+If you don't have a Jenkins instance running, you can run one easily in Docker:
 
 ```
 docker run -d -p 8080:8080 --name localjenkins jenkins/jenkins:lts
 docker logs localjenkins
 open http://localhost:8080
+# perform basic setup wizard steps to bring the new Jenkins master online
 ```
+
+Then you should be able to run jester using the defaults for `-s` / `--url`.
+
+-----
 
 ## Development
 
@@ -52,8 +56,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/jester.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/adampats/jester.
 
 ## License
 
