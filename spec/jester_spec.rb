@@ -22,5 +22,8 @@ describe Jester do
     expect { Jester::Cli.start(ARGV) }.to output(/build/).to_stdout
   end
 
+  it 'has a "version" command' do
+    expect { Jester::Cli.start(ARGV) }.to output(/version/).to_stdout
+  end
 
 end

@@ -47,7 +47,7 @@ module Jester
           script: '// empty job created by jester\n node {print "test"}' }
         xml = pipeline_xml(job_params)
         r = post( @options[:url] + "/createItem?name=#{@options[:job_name]}", xml )
-        if r.status == 200
+        if ! (defined? r.status).nil? && r.status == 200
           puts "Job successfully created."
         else
           puts "Job creation failed."
@@ -108,6 +108,11 @@ module Jester
       puts "See #{@options[:job_name]}.log for output."
     end
 
+    #
+    desc "version", "Output version of jester"
+    def version
+      puts Jester::VERSION
+    end
 
     private
 
@@ -148,7 +153,7 @@ module Jester
         end
         if @options[:verbose]
           puts "DEBUG: "
-          pp resp.to_hash[:response_headers]
+          puts resp.to_hash[:response_headers]
         end
         return resp
       rescue Exception => e
