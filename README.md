@@ -17,27 +17,18 @@ All of this is done from the command line - logging in to the Jenkins UI *not* r
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Install the gem via:
 
-```ruby
-gem 'jester'
+```sh
+gem install jester
 ```
 
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install jester
-
------
 
 ## Usage
 
 If you don't have a Jenkins instance running, you can run one easily in Docker:
 
-```
+```sh
 docker run -d -p 8080:8080 --name localjenkins jenkins/jenkins:lts
 docker logs localjenkins
 open http://localhost:8080
@@ -46,7 +37,57 @@ open http://localhost:8080
 
 Then you should be able to run jester using the defaults for `-s` / `--url`.
 
------
+** Run Jester **
+
+Command usage:
+
+```
+Commands:
+  jester build           # Build (run) a Jenkins pipeline job
+  jester help [COMMAND]  # Describe available commands or one specific command
+  jester new             # Create new Jenkins pipeline job
+  jester test            # Test Jenkins server connectivity
+  jester version         # Output version of jester
+
+Options:
+  -s, [--url=URL]                  # URL of Jenkins master
+                                   # Default: http://localhost:8080
+  -u, [--username=USERNAME]        # User to connect with
+                                   # Default: admin
+  -p, [--password=PASSWORD]        # Password to connect with
+                                   # Default: admin
+  -v, [--verbose], [--no-verbose]  # Toggle verbose/debug output
+
+```
+
+Run your local pipeline on Jenkins (assuming defaults, like Jenkins running on localhost:8080):
+
+```sh
+$ jester test
+Testing authenticated connectivity to http://localhost:8080...
+Success!  Running Jenkins version 2.121.3
+
+$ jester build -f Jenkinsfile.example
+Job config update succeeded.
+Build running - getting output...
+Job 1 result: SUCCESS
+See jester-test-job.log for output.
+
+$ cat jester-test-job.log
+Started by user admin
+Running in Durability level: MAX_SURVIVABILITY
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/jester-test-job
+[Pipeline] {
+[Pipeline] echo
+hello world!
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
+```
+
+Rinse and repeat...
 
 ## Development
 

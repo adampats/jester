@@ -4,5 +4,4 @@
 
 node {
   print "hello world!"
-  sh('env | sort')
 }
