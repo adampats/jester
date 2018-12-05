@@ -2,6 +2,7 @@ require 'thor'
 require 'faraday'
 require 'json'
 require 'uri'
+require 'pry'
 
 module Jester
   class Cli < Thor
@@ -75,15 +76,24 @@ module Jester
 
       if job_exists?(@options[:job_name])
         path = "/job/" + @options[:job_name] + "/config.xml"
+        puts "Job already exists, using path: #{path}" if debug
       else
         path = "/createItem?name=" + @options[:job_name]
+        puts "Job doesn't exist yet, using path: #{path}" if debug
       end
-      r = post( @options[:url] + path, xml )
-      if r.status != 200
-        puts "Job config update failed."
-        quit
-      else
-        puts "Job config update succeeded."
+      begin
+        r = post( @options[:url] + path, xml )
+        if r.status != 200
+          puts "Job config update failed."
+          raise 'JobPostFailed'
+        else
+          puts "Job config update succeeded."
+        end
+      rescue Exception => e
+        puts "Exception: " + e.message
+        puts "POST response status: #{r.status}"
+        puts "POST response body: #{r.body}" if debug
+        return e
       end
 
       build_path = "/job/" + @options[:job_name] + "/build?delay=0sec"
