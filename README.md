@@ -32,12 +32,13 @@ If you don't have a Jenkins instance running, you can run one easily in Docker:
 docker run -d -p 8080:8080 --name localjenkins jenkins/jenkins:lts
 docker logs localjenkins
 open http://localhost:8080
-# perform basic setup wizard steps to bring the new Jenkins master online
+# <Basic setup wizard steps to bring the new Jenkins master online>
+#   It's recommended you create a user of admin:admin for simplicity.
 ```
 
 Then you should be able to run jester using the defaults for `-s` / `--url`.
 
-** Run Jester **
+**Run Jester**
 
 Command usage:
 
